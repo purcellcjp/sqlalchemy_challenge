@@ -39,14 +39,14 @@ def welcome():
     html = (
             f"<h1>Module 10 Challenge: Climate Application</h1>"
             f"<h2>Available Routes:</h2>"
-            f"<table>"
-            f"<tr><th>Links</th></tr>"
-            f"<tr><td><a href=/api/v1.0/precipitation>/api/v1.0/precipitation</td></tr>"
-            f"<tr><td><a href=/api/v1.0/stations>/api/v1.0/stations</td></tr>"
-            f"<tr><td><a href=/api/v1.0/tobs>/api/v1.0/tobs</td></tr>"
-            f"<tr><td><a href=/api/v1.0/<start>>/api/v1.0/<start></td></tr>"
-            f"<tr><td><a href=/api/v1.0/<start>/<end>>/api/v1.0/<start>/<end></td></tr>"
-            f"</table>"
+            f"<b>Note</b>: For routes 4 and 5, you can customize the results by replacing the date parameters in the url (yyyy-mm-dd format).</br>"
+            f"<ol>"
+            f"<li><a href='/api/v1.0/precipitation'</a>/api/v1.0/precipitation</li>"
+            f"<li><a href='/api/v1.0/stations'</a>/api/v1.0/stations</li>"
+            f"<li><a href='/api/v1.0/tobs'</a>/api/v1.0/tobs</li>"
+            f"<li><a href='/api/v1.0/2016-08-23'</a>/api/v1.0/2016-08-23</li>"
+            f"<li><a href='/api/v1.0/2016-08-23/2017-08-23'</a>/api/v1.0/2016-08-23/2017-08-23</li>"
+            f"</ol>"
            )
     
     return html
@@ -114,9 +114,9 @@ def temperature_stats(start, end=None):
     
     session = Session(engine)
     
-    select_list = [func.min(Measurement.prcp), 
-                   func.avg(Measurement.prcp),
-                   func.max(Measurement.prcp)]
+    select_list = [func.min(Measurement.tobs), 
+                   func.avg(Measurement.tobs),
+                   func.max(Measurement.tobs)]
     
     if (end == None):
         results = session.query(*select_list).\
@@ -129,9 +129,18 @@ def temperature_stats(start, end=None):
     session.close()
     
     # Flatten array to normal list
-    temp_results = list(np.ravel(results))
+    # temp_results = list(np.ravel(results))
     
-    return jsonify(temp_results)
+    stats_list=[]
+    
+    for min, avg, max in results:
+        stats_dict={}
+        stats_dict['Minimum'] = min
+        stats_dict['Average'] = avg
+        stats_dict['maximum'] = max
+        stats_list.append(stats_dict)
+        
+    return jsonify(stats_list)
 
 if __name__ == "__main__":
     app.run(debug=True)
